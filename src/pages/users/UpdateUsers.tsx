@@ -81,6 +81,9 @@ const UpdateUsers = ({ handleClose, sendingRequest, setSendingRequest, user }: I
             unit: (typeof (user as any)?.unit === 'object' ? (user as any)?.unit?.id : (user as any)?.unit) ?? null,
             availability: user?.availability ?? 'present',
             otherName: user?.otherName ?? '',
+            // Imported accounts carry "Male"/"Female"; the form's options and schema are lower case,
+            // so without this the gender field read empty and the save was refused.
+            gender: typeof user?.gender === 'string' ? user.gender.trim().toLowerCase() : user?.gender,
         } as any);
         setSelectedBranch(initialBranchOption);
         // eslint-disable-next-line react-hooks/exhaustive-deps

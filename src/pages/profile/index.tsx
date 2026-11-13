@@ -23,8 +23,7 @@ import UpdateUsers from "../users/UpdateUsers";
 import AppBarUtills, { modalStates } from "../../components/appBar/utills";
 import RoutesUtills from "../../core/routes/utills";
 import { crudStates } from "../../utils/constants";
-import MaleProfile from "../../statics/images/male.jpg";
-import FemaleProfile from "../../statics/images/Female.jpg";
+import { defaultAvatar } from "../../utils/helpers";
 import UserHeader from "./UserHeader";
 import UserInfoCard from "./UserInfoCard";
 import WorkInfoCard from "./WorkInfoCard";
@@ -119,7 +118,7 @@ const Profile = () => {
         getUserDetails();
     }, [id]);
 
-    const userImage = image || (user?.profileImage || (user?.gender === 'male' ? MaleProfile : FemaleProfile));
+    const userImage = image || (user?.profileImage || defaultAvatar(user?.gender));
 
 
     const handleProfileImageUpdate = async (file: File) => {
