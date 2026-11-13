@@ -6,6 +6,7 @@ Managing Director
 */
 
 import axiosInstance from "../../../../core/apis/axiosInstance"
+import { TitleOccupancyConflict } from "../classification"
 
 const createTitleService = async (body: Object) => {
     try {
@@ -34,7 +35,17 @@ const deleteTitleService = async (id: string | number) => {
     }
 }
 
+/**
+ * Locations where a single-holder title has more than one active holder. Throws on failure (unlike
+ * the services above), so a refusal cannot be mistaken for "no conflicts".
+ */
+const fetchTitleOccupancyConflicts = async (): Promise<TitleOccupancyConflict[]> => {
+    const { data } = await axiosInstance.get<TitleOccupancyConflict[]>("titles/occupancy-conflicts");
+    return Array.isArray(data) ? data : [];
+}
+
 export {
+    fetchTitleOccupancyConflicts,
     createTitleService,
     updateTitleService,
     deleteTitleService

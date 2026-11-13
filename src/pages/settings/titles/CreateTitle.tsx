@@ -47,9 +47,8 @@ const CreateTitle = ({ sendingRequest, setSendingRequest, handleClose }: ICreate
                 addTitleToStore(response.data);
                 toast.success("Title created successfully", { position: 'bottom-right' });
                 created = true;
-            } else {
-                toast.error("Failed to create title. Please try again.", { position: 'bottom-right' });
             }
+            // Otherwise the dialog stays open; the response interceptor has shown the server's reason.
         } catch (error) {
             console.error("Error creating title:", error);
             toast.error("Failed to create title. Please try again.", { position: 'bottom-right' });

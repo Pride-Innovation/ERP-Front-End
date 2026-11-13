@@ -6,6 +6,7 @@ Managing Director
 */
 
 import {
+  Alert,
   Box,
   Typography,
   Button,
@@ -43,7 +44,8 @@ import { useDebounce } from "../../../hooks/useDebounce";
 import { RequirePermission } from "../../../core/permissions";
 import { PERMISSIONS } from "../../../core/permissions/constants";
 import { PageHero } from "../../../components/layout";
-import { NO_DEPARTMENT, WORKPLACE_OPTIONS, WorkplaceFilter } from "./classification";
+import { NO_DEPARTMENT, TitleOccupancyConflict, WORKPLACE_OPTIONS, WorkplaceFilter } from "./classification";
+import { fetchTitleOccupancyConflicts } from "./service";
 import { fetchAllDepartments, ReferenceOption } from "../../users/service/referenceData";
 
 const PRIMARY = '#08796C';
@@ -92,6 +94,7 @@ const Titles = () => {
   const [workplaceFilter, setWorkplaceFilter] = useState<WorkplaceFilter>("");
   const [departmentFilter, setDepartmentFilter] = useState<string>("");
   const [departments, setDepartments] = useState<ReferenceOption[]>([]);
+  const [conflicts, setConflicts] = useState<TitleOccupancyConflict[]>([]);
   const [pageNumber, setPageNumber] = useState<number>(0);
   const pageSize = 9;
 
@@ -123,6 +126,15 @@ const Titles = () => {
       .catch(() => { /* the department filter simply has no names to offer */ });
     return () => { active = false; };
   }, []);
+
+  // Re-read whenever the titles change, so switching the rule on or off is reflected at once.
+  useEffect(() => {
+    let active = true;
+    fetchTitleOccupancyConflicts()
+      .then(list => { if (active) setConflicts(list); })
+      .catch(() => { if (active) setConflicts([]); });
+    return () => { active = false; };
+  }, [titles]);
 
   useEffect(() => {
     fetchAllTitles({
@@ -230,6 +242,22 @@ const Titles = () => {
           </RequirePermission>
         }
       />
+
+      {conflicts.length > 0 && (
+        <Alert severity="warning" sx={{ mb: 2, borderRadius: '8px' }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+            Titles limited to one holder per location are held by more than one active account:
+          </Typography>
+          {conflicts.map(c => (
+            <Typography key={`${c.titleId}-${c.branchId}`} variant="body2">
+              {c.titleName} at {c.branchName}: {c.holders.map(h => h.name).join(", ")}
+            </Typography>
+          ))}
+          <Typography variant="body2" sx={{ mt: 0.5 }}>
+            Disable or block all but one at each location. Approvals go to the oldest account until then.
+          </Typography>
+        </Alert>
+      )}
 
       {/* Filter Bar */}
       <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ xs: "stretch", sm: "center" }} justifyContent="space-between" sx={{ mb: 3 }}>
