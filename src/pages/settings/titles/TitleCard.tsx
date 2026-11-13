@@ -94,9 +94,19 @@ const TitleCard = ({ title, updateTitle, deleteTitle, index = 0 }: ITitleDetails
                                 />
                             )}
                         </Stack>
-                        <Typography variant="caption" color="text.secondary">
-                            Position
-                        </Typography>
+                        <Stack direction="row" spacing={0.75} alignItems="center">
+                            <Typography variant="caption" color="text.secondary">
+                                Position
+                            </Typography>
+                            {title.singleHolder && (
+                                <Chip
+                                    label="One holder per location"
+                                    size="small"
+                                    title="Only one active account per branch / Head Office may hold this title"
+                                    sx={{ height: 20, fontSize: '0.8rem', fontWeight: 600, bgcolor: alpha('#B45309', 0.1), color: '#B45309' }}
+                                />
+                            )}
+                        </Stack>
                     </Box>
                 </Stack>
 

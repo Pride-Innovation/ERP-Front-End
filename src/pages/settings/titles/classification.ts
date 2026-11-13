@@ -68,4 +68,14 @@ export const toTitlePayload = (form: Record<string, unknown>) => ({
     role: idOf(form.role),
     workplace: (form.workplace as TitleWorkplace | '' | null | undefined) || null,
     departmentId: idOf(form.departmentId),
+    singleHolder: form.singleHolder === true,
 });
+
+/** One location where a single-holder title has more than one active holder (`GET /titles/occupancy-conflicts`). */
+export interface TitleOccupancyConflict {
+    titleId: number;
+    titleName: string;
+    branchId: number;
+    branchName: string;
+    holders: Array<{ id: number; name: string; email?: string | null }>;
+}

@@ -44,6 +44,7 @@ const UpdateTitle = ({ handleClose, sendingRequest, setSendingRequest, title }: 
             reportsTo: title.reportsTo?.id as any,
             role: (typeof title.role === 'object' && title.role ? (title.role as any).id : title.role) as any,
             workplace: (title.workplace ?? '') as any,
+            singleHolder: title.singleHolder === true,
             departmentId: title.department?.id ?? null,
         });
     }, [title, reset]);
@@ -59,10 +60,10 @@ const UpdateTitle = ({ handleClose, sendingRequest, setSendingRequest, title }: 
                 toast.success("Title updated successfully", { position: "bottom-right" });
                 updateTitleInStore(response.data);
                 updated = true;
-            } else {
-                // Trap #6: a failure arrives as a value. Keep the dialog open rather than look saved.
-                toast.error("Failed to update title. Please try again.", { position: "bottom-right" });
             }
+            // Otherwise (trap #6: a failure arrives as a value) the dialog stays open. The response
+            // interceptor has already shown the server's reason - e.g. which branch already has two
+            // holders when "one holder per location" is switched on - so no second toast here.
         } catch (error) {
             console.error("Error updating title:", error);
             toast.error("Failed to update title. Please try again.", { position: "bottom-right" });

@@ -38,7 +38,15 @@ describe('toTitlePayload', () => {
         expect(toTitlePayload({
             name: 'Teller', shortCode: 'TLR', reportsTo: '4', role: { id: 2 },
             workplace: 'BRANCH', departmentId: 5,
-        })).toEqual({ name: 'Teller', shortCode: 'TLR', reportsTo: 4, role: 2, workplace: 'BRANCH', departmentId: 5 });
+        })).toEqual({ name: 'Teller', shortCode: 'TLR', reportsTo: 4, role: 2, workplace: 'BRANCH', departmentId: 5, singleHolder: false });
+    });
+
+    /* The server keeps the current value only when the field is absent; the form always sends it. */
+    it('always sends the one-holder-per-location switch as a boolean', () => {
+        expect(toTitlePayload({ name: 'Branch Manager', shortCode: 'BM', role: 1, singleHolder: true }))
+            .toHaveProperty('singleHolder', true);
+        expect(toTitlePayload({ name: 'Teller', shortCode: 'TLR', role: 1 }))
+            .toHaveProperty('singleHolder', false);
     });
 
     /* An update replaces the whole title: "Not set" and "None" must be sent as null, not left out. */

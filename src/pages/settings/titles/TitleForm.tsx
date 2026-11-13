@@ -5,15 +5,17 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     Autocomplete,
     Box,
     Button as MuiButton,
     CircularProgress,
+    FormControlLabel,
     Grid,
-    MenuItem,
+    Link,
     Paper,
+    Switch,
     Popper,
     Stack,
     TextField,
@@ -38,6 +40,7 @@ import { fetchRowsService } from '../../../core/apis/globalService';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { autocompleteSx } from '../../../components/forms/Autocomplete';
 import LabelOutlinedIcon from '@mui/icons-material/LabelOutlined';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { WORKPLACE_OPTIONS } from './classification';
 import { fetchAllDepartments, ReferenceOption } from '../../users/service/referenceData';
 
@@ -195,6 +198,64 @@ const ReportsToPicker = ({ control, initialOption }: ReportsToPickerProps) => {
     );
 };
 
+/* ── fixed-list picker (Used at, Department) ──────────────────────── */
+
+/**
+ * A pick-one field over a short fixed list, drawn exactly like the Reports To picker above it (MUI
+ * Autocomplete + autocompleteSx) so the form reads as one. Stores the option's value; clearing it
+ * stores null, which is "Not set" / "None". Not the shared UseFormAutocompleteComponent: that one
+ * writes into a form-wide context the Role field below also uses.
+ */
+interface OptionPickerProps {
+    control: Control<ITitle>;
+    name: 'workplace' | 'departmentId';
+    label: string;
+    options: Array<{ value: string | number; label: string }>;
+    helperText?: React.ReactNode;
+    error?: boolean;
+    loading?: boolean;
+}
+
+const OptionPicker = ({ control, name, label, options, helperText, error, loading }: OptionPickerProps) => (
+    <Controller
+        control={control}
+        name={name}
+        render={({ field }) => {
+            const selected = options.find((o) => String(o.value) === String(field.value ?? '')) ?? null;
+            return (
+                <Autocomplete
+                    fullWidth
+                    options={options}
+                    value={selected}
+                    loading={loading}
+                    getOptionLabel={(o) => o.label}
+                    isOptionEqualToValue={(o, v) => String(o.value) === String(v.value)}
+                    onChange={(_, v) => field.onChange(v ? v.value : null)}
+                    PopperComponent={CustomPopper}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            label={label}
+                            error={error}
+                            helperText={helperText}
+                            sx={autocompleteSx}
+                            InputProps={{
+                                ...params.InputProps,
+                                endAdornment: (
+                                    <>
+                                        {loading && <CircularProgress size={14} sx={{ color: P, mr: 0.5 }} />}
+                                        {params.InputProps.endAdornment}
+                                    </>
+                                ),
+                            }}
+                        />
+                    )}
+                />
+            );
+        }}
+    />
+);
+
 /* ── form section wrapper ─────────────────────────────────────────── */
 
 const FormSection = ({
@@ -265,15 +326,30 @@ const TitleForm = ({
     const theme = useTheme();
 
     const [departments, setDepartments] = useState<ReferenceOption[]>([]);
-    const [departmentsFailed, setDepartmentsFailed] = useState(false);
+    const [departmentsLoading, setDepartmentsLoading] = useState(false);
+    /** Why the list could not be read, shown in the field so the cause is visible, not just the fact. */
+    const [departmentsError, setDepartmentsError] = useState<string | null>(null);
+    const mounted = useRef(true);
+
+    const loadDepartments = () => {
+        setDepartmentsLoading(true);
+        setDepartmentsError(null);
+        fetchAllDepartments()
+            .then((options) => { if (mounted.current) setDepartments(options); })
+            .catch((err: any) => {
+                console.error('Loading departments for the title form failed', err);
+                if (!mounted.current) return;
+                const status = err?.response?.status;
+                setDepartmentsError(status ? `HTTP ${status}` : (err?.message || 'unexpected response'));
+            })
+            .finally(() => { if (mounted.current) setDepartmentsLoading(false); });
+    };
 
     useEffect(() => {
+        mounted.current = true;
         fetchAllRoles();
-        let active = true;
-        fetchAllDepartments()
-            .then((options) => { if (active) setDepartments(options); })
-            .catch(() => { if (active) setDepartmentsFailed(true); });
-        return () => { active = false; };
+        loadDepartments();
+        return () => { mounted.current = false; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -330,47 +406,29 @@ const TitleForm = ({
                     </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <Controller
+                    <OptionPicker
                         control={control}
                         name="workplace"
-                        render={({ field }) => (
-                            <TextField
-                                select
-                                fullWidth
-                                label="Used at"
-                                value={field.value ?? ''}
-                                onChange={(e) => field.onChange(e.target.value)}
-                                sx={autocompleteSx}
-                            >
-                                <MenuItem value=""><em>Not set</em></MenuItem>
-                                {WORKPLACE_OPTIONS.map((o) => (
-                                    <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
-                                ))}
-                            </TextField>
-                        )}
+                        label="Used at"
+                        options={WORKPLACE_OPTIONS}
+                        helperText="Optional. Clear it to leave it not set."
                     />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                    <Controller
+                    <OptionPicker
                         control={control}
                         name="departmentId"
-                        render={({ field }) => (
-                            <TextField
-                                select
-                                fullWidth
-                                label="Department"
-                                value={field.value ?? ''}
-                                onChange={(e) => field.onChange(e.target.value === '' ? null : Number(e.target.value))}
-                                helperText={departmentsFailed ? 'Departments could not be loaded.' : 'Optional'}
-                                error={departmentsFailed}
-                                sx={autocompleteSx}
-                                SelectProps={{ MenuProps: { PaperProps: { sx: { maxHeight: 320 } } } }}
-                            >
-                                <MenuItem value=""><em>None</em></MenuItem>
-                                {departments.map((d) => (
-                                    <MenuItem key={d.value} value={d.value}>{d.label}</MenuItem>
-                                ))}
-                            </TextField>
+                        label="Department"
+                        options={departments}
+                        loading={departmentsLoading}
+                        error={departmentsError != null}
+                        helperText={departmentsError == null ? 'Optional' : (
+                            <span>
+                                Departments could not be loaded ({departmentsError}).{' '}
+                                <Link component="button" type="button" onClick={loadDepartments} sx={{ fontSize: 'inherit', verticalAlign: 'baseline' }}>
+                                    Retry
+                                </Link>
+                            </span>
                         )}
                     />
                 </Grid>
@@ -390,6 +448,34 @@ const TitleForm = ({
                         />
                     </Grid>
                 ))}
+            </FormSection>
+
+            {/* Holders per location — a rule, unlike the classification above */}
+            <FormSection title="Holders per location" icon={<PersonOutlineIcon fontSize="small" />}>
+                <Grid item xs={12}>
+                    <Controller
+                        control={control}
+                        name="singleHolder"
+                        render={({ field }) => (
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={field.value === true}
+                                        onChange={(e) => field.onChange(e.target.checked)}
+                                        sx={{ '& .Mui-checked': { color: P }, '& .Mui-checked + .MuiSwitch-track': { bgcolor: P } }}
+                                    />
+                                }
+                                label="Only one active holder per branch / Head Office"
+                            />
+                        )}
+                    />
+                    <Typography sx={{ mt: 0.5, fontSize: '0.8rem', color: '#64748B' }}>
+                        For titles such as Branch Manager or a head of department, which approvals are routed to.
+                        Giving this title to a second active person at the same location is refused until the
+                        current holder is disabled or blocked. Someone on leave still holds the title. It cannot be
+                        switched on while a location already has two active holders.
+                    </Typography>
+                </Grid>
             </FormSection>
 
             {/* Actions */}

@@ -25,6 +25,8 @@ export interface ITitle {
     department?: { id: number; name: string; shortCode?: string } | null;
     /** Form-only: the department picker's value, sent as `departmentId`. */
     departmentId?: number | null;
+    /** Only one active holder per location (a branch, or Head Office). */
+    singleHolder?: boolean;
 }
 
 export interface ITitleDetails {

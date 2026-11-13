@@ -3153,6 +3153,53 @@ scope, approval routing or the user import**, and the form says so.
 `TitleClassificationTest` (backend) and `classification.test.ts` (front end) pin it, including that the
 three workplace values partition the whole table.
 
+### One holder per location (V32 `title.single_holder`)
+
+Approval routing finds "the holder of this title at the requester's branch", and every lookup took
+`get(0)` of an **unordered** query that **included disabled accounts** — with two Branch Managers MySQL
+chose the approver, and a departed holder could be chosen and leave a request with someone who cannot
+sign in. Nothing stopped two holders either.
+
+**A title may be marked single-holder** (switch on the title form; every title starts off, so nothing
+is refused on deploy day). `TitleOccupancyService` is the one rule, called wherever an account comes
+to hold a title at a location: create, edit, import (also against earlier rows of the same file),
+enable, unblock, and **email verification**. Refusals are **409, no `errorCode`**, so the interceptor
+shows the message on every screen, naming the holder.
+
+- **"Active holder" is `UserRepository.ACTIVE_HOLDER`: not blocked, and enabled *or on leave*.**
+  "Disabled" means three things here — switched off by an administrator, **on leave**
+  (`LeaveService` disables the account until the return), and not yet verified — and only the first
+  frees a title. A BM on leave is still the BM; counting them out would let a second be appointed and,
+  in routing, would skip the step past the acting officer `effectiveApprover` hands it to.
+- **Unverified accounts are not holders**, so two can be created before either verifies. Whichever
+  verifies second is refused in `verifyAccount`, before it is switched on.
+- **Editing never re-checks unless it changes who holds what where** (title, location, or the account
+  becoming active), and an account never counts against itself — a BM editing their own record is
+  never refused.
+- **Switching a title to single-holder is refused while any location has two active holders**, listing
+  them. Absent from the request means *keep* (unlike the filtering fields): clearing it silently would
+  loosen a rule.
+- **Routing** (`ApproverChainResolver`, `WorkflowEngineService` ×2, `WorkflowResolveService`,
+  `RequestService`, `IssuanceService`) now reads `findActiveHoldersInBranch`: active holders only,
+  oldest account first. `findByTitleIdAndBranchId` and the bank-wide `findByTitleId` are deleted.
+  *Fixed on the way:* `IssuanceService.getAdminManager` looked the supervisor title up **across the
+  whole bank** for everyone but a BOM, so the "Stores Request" mail could go to another branch's manager.
+- **Concurrency:** the check locks the title row (`TitleRepository.lockRow`, native, one row) for the
+  caller's transaction. `requireAssignable` is deliberately not `@Transactional` — a refusal thrown
+  across a transactional proxy marks the caller rollback-only even when caught, which `verifyAccount`
+  does. `enableUser` and `verifyAccount` became `@Transactional` for the lock.
+- `GET /titles/occupancy-conflicts` (`READ_SETTING`) feeds a warning on the Titles page. It should stay
+  empty: every path that could create a duplicate is refused.
+
+`TitleSingleHolderTest` covers each path, leave and verification included. Verified non-vacuous by
+removing the enable check and, separately, the on-leave limb: each fails its own case.
+
+*Still open:* title **writes** (`POST/PUT/DELETE /titles`) remain in `KNOWN_UNGUARDED` — any login can
+edit a title, now including this switch. Guarding them by verb (`CREATE/UPDATE/DELETE_SETTING`), as
+asset types were, is the obvious next step. And `LeaveScheduler` re-enables an account when its leave
+ends even if an administrator disabled it meanwhile — pre-existing, and it would make that person a
+holder again without a check.
+
 ## Sign-in goes through the bank's LDAP Authentication API
 
 **AD checks the password; everything else stays here.** `POST /auth/login` still takes the account's
