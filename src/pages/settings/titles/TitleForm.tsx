@@ -34,7 +34,6 @@ import {
     UseFormInput,
 } from '../../../components/forms';
 import TitleUtills from './utills';
-import RoleUtills from '../roles/utills';
 import { ITitle, ITitleForm, ITitleOption } from './interface';
 import { fetchRowsService } from '../../../core/apis/globalService';
 import { useDebounce } from '../../../hooks/useDebounce';
@@ -321,8 +320,13 @@ const TitleForm = ({
     update,
     initialReportsTo,
 }: ITitleForm) => {
-    const { formFields } = TitleUtills();
-    const { fetchAllRoles } = RoleUtills();
+    /*
+     * Roles come from fetchRolesForFilter (every role), not the Roles page's fetchAllRoles: that one
+     * is that page's paged listing, 9 to a page, so with 12 roles the Role picker here was missing
+     * three (Supervisor among them) - and it overwrote the shared role list the Titles page's own
+     * Role filter reads, cutting that down to 9 as well.
+     */
+    const { formFields, fetchRolesForFilter } = TitleUtills();
     const theme = useTheme();
 
     const [departments, setDepartments] = useState<ReferenceOption[]>([]);
@@ -347,7 +351,7 @@ const TitleForm = ({
 
     useEffect(() => {
         mounted.current = true;
-        fetchAllRoles();
+        fetchRolesForFilter();
         loadDepartments();
         return () => { mounted.current = false; };
         // eslint-disable-next-line react-hooks/exhaustive-deps

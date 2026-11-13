@@ -16,8 +16,7 @@ import {
 import React, { useState } from 'react'
 import { TypographyComponent } from '../headers/TypographyComponent';
 import PopoverComponent from '../forms/Popover';
-import MaleLogo from '../../statics/images/male.jpg';
-import FemaleLogo from '../../statics/images/Female.jpg'
+import { defaultAvatar } from '../../utils/helpers';
 import AppBarUtills, { modalStates } from './utills';
 import ModalComponent from '../modal';
 import ChangePassword from '../../pages/profile/ChangePassword';
@@ -129,7 +128,7 @@ const NavBar = () => {
                             }}
                         >
                             <Avatar
-                                src={getCurrentUser()?.image || (getCurrentUser()?.gender === 'male' ? MaleLogo : FemaleLogo)}
+                                src={getCurrentUser()?.image || defaultAvatar(getCurrentUser()?.gender)}
                                 sx={{
                                     height: 36,
                                     width: 36,

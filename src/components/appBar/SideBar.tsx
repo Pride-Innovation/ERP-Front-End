@@ -22,8 +22,7 @@ import { useLocation, useNavigate } from 'react-router';
 import { brand, neutral, border } from '../../utils/tokens';
 import { ROUTES } from '../../core/routes/routes';
 import RoutesUtills from '../../core/routes/utills';
-import MaleLogo from '../../statics/images/male.jpg';
-import FemaleLogo from '../../statics/images/Female.jpg';
+import { defaultAvatar } from '../../utils/helpers';
 import HandleRoutes from './HandleRoutes';
 import SideBarElements from './sideBarElements';
 import { ISideBarItem } from './interface';
@@ -217,7 +216,7 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
                             }}
                         >
                             <Avatar
-                                src={currentUser?.image || (currentUser?.gender === 'male' ? MaleLogo : FemaleLogo)}
+                                src={currentUser?.image || defaultAvatar(currentUser?.gender)}
                                 sx={{
                                     width: 32,
                                     height: 32,

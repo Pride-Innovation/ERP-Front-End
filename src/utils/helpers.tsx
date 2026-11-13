@@ -79,6 +79,14 @@ export const isCamelCase = (str: string): boolean => {
     return camelCaseRegex.test(str);
 }
 
+/**
+ * The placeholder picture for someone with no photo. Gender is compared case-insensitively: the
+ * server stores "Male" / "Female" (the import template and the user form both capitalise it), so the
+ * old `gender === 'male'` checks never matched and every man was shown the female placeholder.
+ */
+export const defaultAvatar = (gender?: string | null): string =>
+    gender?.trim().toLowerCase() === 'male' ? MaleAvatar : FemaleAvatar;
+
 export const determineImage = (row: GridRowModel): string => {
     if (Object.keys(row).includes("gender")) {
         const gender = (row["gender"]).toLowerCase();
