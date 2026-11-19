@@ -3341,6 +3341,43 @@ row error; an imported asset is edited with no LPO and its reference set and cle
 keeps its order and ignores a typed reference; create without an LPO is a 400. Restoring the old lookup
 fails both edit cases with `Stock with LPO Number: null is not found` — the reported bug.
 
+## Units of measure — one managed list (V34)
+
+A commodity's unit (`commodity.group_name`, labelled "Unit of Measure") was free text; an asset's
+(`asset.unit_of_measure`) came from four values hardcoded in the page (pieces, dozens, boxes, reams);
+nothing linked them, and **received assets got no unit at all**. Measured on UAT: commodities used
+pieces 75, boxes 4, litres 3, lots 2, **ream** 1, gallons 1 (litres/lots/gallons were not in the asset
+list); assets held **piece** 28 (the import), pieces 2, NULL 1.
+
+**Decisions (user, 19 Nov 2026):** the list is **managed in Settings** (Settings → Units of Measure, not
+"Units", which is organisational units), and an asset **defaults to its commodity's unit but may differ**.
+
+- `unit_of_measure` table (name unique, stored lower-case and trimmed, `active`). **Add and switch
+  off only — no rename, no delete**: units are still stored as text on commodities and assets, so a
+  rename would orphan them. Switched off = not offered for new choices; records using it keep it.
+  `GET /units-of-measure` is open to any signed-in user (three forms read it; in
+  `DELIBERATELY_AUTHENTICATED_ONLY`); add is `CREATE_SETTING`, on/off `UPDATE_SETTING`; audited.
+- `UnitOfMeasureService.resolve(chosen, current)` is the one gate — commodity create/update, asset
+  create/update, the import. Blank → null (the caller decides); a value equal to the record's current
+  unit is accepted even if switched off (a re-save must never fail over what it already carried);
+  otherwise it must be an active unit, or a 400 naming the choices.
+- **Asset unit:** chosen, else the commodity's — on create, update (`unitFor`), import (blank cell) and
+  **receiving** (`StockService` now sets it). The form fills it from the commodity when one is picked
+  and when it changes, and leaves an asset's existing unit alone (`UnitFromCommodity` in `AssetForm`).
+- **V34 cleanup:** lower-cased both columns, `ream`→`reams`, `piece`/`pcs`/`pc`→`pieces`, empty asset
+  units filled from the commodity, then seeded the list from what is in use. SQL updates do not reach
+  `asset_aud` — a spelling correction, not an edit anyone made.
+
+**A trap closed on the way: the commodity seeder matched on name *and* unit, and overwrote the unit.**
+With units editable in Settings, a commodity whose unit was changed would stop matching and **every
+restart would create a duplicate** beside it (verified: 85 → 86 with the old lookup). It now matches by
+name within the category and never touches an existing commodity's unit; the JSON's unit is only the
+starting value for a commodity it creates (`assetTypes.json` "Ream" → "Reams"). After it,
+`seedFromCommodities()` adds any unit a commodity uses that the list lacks — create-only, so a unit
+switched off stays off; this is what fills a new database's list.
+
+`UnitOfMeasureTest` (backend) and `unitsOfMeasure.test.ts` pin it.
+
 ## Still open
 
 **1. Permissions gating across the app — front-end sweep done.** Row menus are now filtered

@@ -10,7 +10,7 @@ import { IOptions, ITableHeader } from "../../../components/tables/interface";
 import { IFormData, IOfficeEquipment, IOfficeEquipmentTableData } from "../interface";
 import { officeEquipmentMock } from "../../../mocks/officeEquipment";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
-import { assetTypesStatusConstants, crudStates, unitsOfMeasure } from "../../../utils/constants";
+import { assetTypesStatusConstants, crudStates } from "../../../utils/constants";
 import { ROUTES } from "../../../core/routes/routes";
 import { useNavigate } from "react-router";
 import moment from "moment";
@@ -256,7 +256,8 @@ const OfficeEquipmentUtills = () => {
             value: "unitOfMeasure",
             label: 'Unit of Measure',
             type: "select",
-            options: unitsOfMeasure
+            // Filled by AssetForm from Settings → Units of Measure.
+            options: []
         },
         {
             value: "netValueB",

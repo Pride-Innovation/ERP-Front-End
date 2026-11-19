@@ -379,6 +379,8 @@ export interface IAssetImportTemplate {
     statuses: string[];
     /** "PBL0001 — Jane Doe". */
     staff: string[];
+    /** Active units from Settings → Units of Measure. Optional: an older server does not send it. */
+    unitsOfMeasure?: string[];
     /** Rows per request; a file is chunked into batches of this size. */
     batchSize: number;
     /** Rows per file, checked before anything is uploaded. */
