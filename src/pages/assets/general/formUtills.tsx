@@ -351,11 +351,21 @@ const OfficeEquipmentUtills = () => {
             options: optionsObject.suppliersOptions
         },
         {
+            // The stock order this asset is registered against. Chosen on create; fixed afterwards,
+            // because an edit never moves an asset to another order. `AssetForm` swaps it for
+            // `lpoReference` on an asset that has no order.
             value: "lpoNumber",
             label: 'LPO Number',
             type: "autocomplete",
             options: optionsObject.inventoryOptions,
-            disabled: true
+            disabledOnUpdate: true
+        },
+        {
+            // Update form only, and only for an asset with no stock order (an imported one).
+            value: "lpoReference",
+            label: 'LPO Reference',
+            type: "input",
+            required: false
         },
         {
             value: "model",

@@ -103,8 +103,11 @@ export interface ICountableStore {
 
 export interface IStockAdjustment {
     id: number;
+    storeId?: number | null;
     storeName?: string | null;
+    branchName?: string | null;
     commodityName?: string | null;
+    assetTypeName?: string | null;
     quantityDelta: number;
     quantityBefore: number;
     quantityAfter: number;
@@ -112,12 +115,30 @@ export interface IStockAdjustment {
     note?: string | null;
     countReference?: string | null;
     postedAt: string;
+    postedByName?: string | null;
 }
 
+export interface IAdjustmentStoreOption {
+    id: number;
+    name: string;
+    branchId?: number | null;
+    branchName?: string | null;
+}
+
+/**
+ * One page of the adjustment history. The totals (`byReason`, `totalLines`, units) cover every
+ * adjustment matching the filters, never just the page.
+ */
 export interface IVarianceReport {
     byReason: { reason: AdjustmentReason; lines: number; netUnits: number }[];
     adjustments: IStockAdjustment[];
     totalLines: number;
     unitsWrittenUp: number;
     unitsWrittenDown: number;
+    pageNumber?: number;
+    pageSize?: number;
+    totalPages?: number;
+    /** Values present in the viewer's history, not narrowed by the active filters. */
+    storeOptions?: IAdjustmentStoreOption[];
+    categoryOptions?: { id: number; name: string }[];
 }

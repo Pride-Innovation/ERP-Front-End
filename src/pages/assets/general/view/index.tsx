@@ -527,7 +527,14 @@ const GeneralAssetDetails = () => {
                                             <Grid item xs={12} sm={6}><Field label="Net Book Value" value={asset.netValueB ?? null} money /></Grid>
                                             <Grid item xs={12} sm={6}><Field label="Detail Net Book Value" value={asset.detailNetBookValue ?? null} money /></Grid>
                                             <Grid item xs={12} sm={6}><Field label="Depreciation Rate" value={asset.assetDepreciationRate ?? null} /></Grid>
-                                            <Grid item xs={12} sm={6}><Field label="LPO Number" value={asset.stock?.lpoNumber || null} copyable /></Grid>
+                                            {/*
+                                              * A received asset's LPO is its stock order's. An imported asset has no
+                                              * order, so it can only carry the LPO someone typed in - labelled as such,
+                                              * so a typed reference is never read as a link to an order.
+                                              */}
+                                            {asset.stock || !asset.lpoReference
+                                                ? <Grid item xs={12} sm={6}><Field label="LPO Number" value={asset.stock?.lpoNumber || null} copyable /></Grid>
+                                                : <Grid item xs={12} sm={6}><Field label="LPO Reference (recorded, no stock order)" value={asset.lpoReference} copyable /></Grid>}
                                             <Grid item xs={12} sm={6}><Field label="Date Received" value={asset.dateReceipt ? moment(asset.dateReceipt).format('Do MMMM YYYY') : null} /></Grid>
                                         </Section>
 

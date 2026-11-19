@@ -14,6 +14,7 @@ import { IOptions } from '../tables/interface';
 import { useDebounce } from '../../hooks/useDebounce';
 import { AutocompleteContext } from '../../context/autocomplete';
 import { alpha, Popper } from '@mui/material';
+import { disabledInputRootSx, disabledLabelSx } from './Inputs';
 
 export const PRIMARY_COLOR = '#08796C';
 
@@ -37,10 +38,7 @@ export const autocompleteSx = {
                 boxShadow: `0 0 0 3px ${alpha(PRIMARY_COLOR, 0.09)}`,
             },
         },
-        '&.Mui-disabled': {
-            backgroundColor: '#F3F4F6',
-            opacity: 0.7,
-        },
+        '&.Mui-disabled': disabledInputRootSx,
         '&.Mui-error .MuiOutlinedInput-notchedOutline': {
             borderColor: '#D32F2F',
         },
@@ -59,6 +57,7 @@ export const autocompleteSx = {
         fontSize: '0.9375rem',
         '&.Mui-focused': { color: PRIMARY_COLOR },
         '&.Mui-error': { color: '#D32F2F' },
+        '&.Mui-disabled': disabledLabelSx,
     },
     // root vertical = 0, inner vertical = 13px → same total as Input/Select (13px per side)
     '& .MuiInputLabel-outlined:not(.MuiInputLabel-shrink)': {

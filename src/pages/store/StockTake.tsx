@@ -19,7 +19,6 @@ import {
     DialogTitle,
     Grid,
     IconButton,
-    Link,
     MenuItem,
     Paper,
     Stack,
@@ -38,7 +37,6 @@ import {
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import moment from 'moment';
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import CloseIcon from '@mui/icons-material/Close';
@@ -52,7 +50,8 @@ import ExpandLessRoundedIcon from '@mui/icons-material/ExpandLessRounded';
 import {
     fetchCountableStoresService, fetchStockAdjustmentsService, fetchStockCountsService, openStockCountService,
 } from './service';
-import { ICountableStore, IStockCount, IVarianceReport, adjustmentReasonLabel } from './stockTakeInterface';
+import { ICountableStore, IStockCount, IVarianceReport } from './stockTakeInterface';
+import AdjustmentHistory from './AdjustmentHistory';
 import { canOpenCount, isActionable } from './stockTakeRules';
 import {
     STOCK_TAKE_STEPS, StockTakeTab, defaultTab, inTab, isFinished, nextStep,
@@ -111,7 +110,8 @@ const StockTake = () => {
         try {
             const [c, r] = await Promise.all([
                 fetchStockCountsService(),
-                fetchStockAdjustmentsService(),
+                // The tiles' all-time totals only; the history fetches its own pages.
+                fetchStockAdjustmentsService({ pageSize: 1 }),
             ]);
             setCounts((c.data as IStockCount[]) ?? []);
             setReport(r.data as IVarianceReport);
@@ -278,64 +278,13 @@ const StockTake = () => {
             )}
 
             {/* Variance history */}
-            {!loading && report && report.adjustments.length > 0 && (
-                <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden' }}>
-                    <Box sx={{ px: 2.5, py: 1.75, borderBottom: `1px solid ${border.subtle}` }}>
-                        <Typography sx={{ fontWeight: 700, color: neutral[900] }}>Adjustment History</Typography>
-                        <Typography variant="caption" sx={{ color: neutral[500] }}>
-                            Every balance correction, with the reason it was made
-                        </Typography>
-                    </Box>
-                    <TableContainer sx={{ overflowX: 'auto' }}>
-                        <Table size="small" sx={{ minWidth: 800 }}>
-                            <TableHead>
-                                <TableRow sx={{ '& th': { bgcolor: alpha(brand[500], 0.04), borderBottom: `1px solid ${border.subtle}`, fontWeight: 700, fontSize: '0.8rem', color: brand[700], textTransform: 'uppercase', letterSpacing: '0.05em', py: 1.4, whiteSpace: 'nowrap' } }}>
-                                    <TableCell>Commodity</TableCell>
-                                    <TableCell>Store</TableCell>
-                                    <TableCell align="center">Before</TableCell>
-                                    <TableCell align="center">After</TableCell>
-                                    <TableCell align="center">Change</TableCell>
-                                    <TableCell>Reason</TableCell>
-                                    <TableCell>Count</TableCell>
-                                    <TableCell>Posted</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {report.adjustments.map((a, idx) => (
-                                    <TableRow key={a.id} hover sx={{ '&:nth-of-type(odd)': { bgcolor: alpha(neutral[900], 0.012) }, '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.2, fontSize: '0.875rem' } }}>
-                                        <TableCell sx={{ fontWeight: 600, color: neutral[900] }}>{a.commodityName}</TableCell>
-                                        <TableCell sx={{ color: neutral[600] }}>{a.storeName}</TableCell>
-                                        <TableCell align="center" sx={{ fontVariantNumeric: 'tabular-nums' }}>{a.quantityBefore}</TableCell>
-                                        <TableCell align="center" sx={{ fontVariantNumeric: 'tabular-nums' }}>{a.quantityAfter}</TableCell>
-                                        <TableCell align="center">
-                                            <Chip size="small" label={a.quantityDelta > 0 ? `+${a.quantityDelta}` : a.quantityDelta}
-                                                sx={{
-                                                    height: 21, fontWeight: 700, fontVariantNumeric: 'tabular-nums',
-                                                    bgcolor: a.quantityDelta > 0 ? statusTokens.success.soft : statusTokens.danger.soft,
-                                                    color: a.quantityDelta > 0 ? statusTokens.success.strong : statusTokens.danger.strong,
-                                                }} />
-                                        </TableCell>
-                                        <TableCell sx={{ color: neutral[700] }}>
-                                            {adjustmentReasonLabel(a.reason)}
-                                            {a.note && <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>{a.note}</Typography>}
-                                        </TableCell>
-                                        {/* A reversal comes from a deleted stock order and belongs to no count. */}
-                                        <TableCell sx={{ color: neutral[500], fontSize: '0.8rem' }}>
-                                            {a.countReference && countIdByReference.has(a.countReference) ? (
-                                                <Link component="button" underline="hover"
-                                                    onClick={() => navigate(`${ROUTES.STOCK_TAKE}/${countIdByReference.get(a.countReference as string)}`)}
-                                                    sx={{ fontSize: '0.8rem', fontWeight: 600, color: brand[700] }}>
-                                                    {a.countReference}
-                                                </Link>
-                                            ) : (a.countReference || '—')}
-                                        </TableCell>
-                                        <TableCell sx={{ color: neutral[500], fontSize: '0.8rem' }}>{moment(a.postedAt).format('DD MMM YYYY')}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Paper>
+            {/* Shown once anything has been adjusted; filtered, paged and exported by the server. */}
+            {!loading && report && report.totalLines > 0 && (
+                <AdjustmentHistory
+                    seesEveryBranch={seesEveryBranch}
+                    countIdByReference={countIdByReference}
+                    onOpenCount={(id) => navigate(`${ROUTES.STOCK_TAKE}/${id}`)}
+                />
             )}
 
             {mayOpen && <OpenCountDialog open={openDialog} onClose={() => setOpenDialog(false)} onOpened={(id) => navigate(`${ROUTES.STOCK_TAKE}/${id}`)} />}
@@ -441,8 +390,8 @@ const OpenCountDialog = ({ open, onClose, onOpened }: {
                 <Stack spacing={2.5} sx={{ pt: 1 }}>
                     {!loadingStores && stores.length === 0 ? (
                         <Alert severity="warning" sx={{ borderRadius: 2 }}>
-                            No store at your branch has stock lines to count. A count covers consumable
-                            balances; serialized assets are not counted here.
+                            No store at your branch has consumable stock to count. Categories that track
+                            individual assets (Computers, Furniture, Equipment and the like) are not counted here.
                         </Alert>
                     ) : (
                         <Autocomplete
@@ -476,7 +425,9 @@ const OpenCountDialog = ({ open, onClose, onOpened }: {
                     />
                     <Alert severity="info" sx={{ borderRadius: 2 }}>
                         This is a <strong>blind count</strong>: expected quantities are withheld until you
-                        submit, so the shelf is counted rather than the number confirmed.
+                        submit, so the shelf is counted rather than the number confirmed. It covers
+                        consumables only; items in categories that track individual assets (laptops,
+                        furniture) are left off the sheet.
                     </Alert>
                 </Stack>
             </DialogContent>

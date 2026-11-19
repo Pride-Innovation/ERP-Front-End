@@ -53,6 +53,18 @@ describe('asset import columns', () => {
         });
     });
 
+    /**
+     * An imported asset has no stock order, so the form's LPO setting (which is about choosing one)
+     * must neither hide this column nor make it compulsory.
+     */
+    it('always offers LPO Reference, and never requires it', () => {
+        const spec = ASSET_IMPORT_COLUMNS.find((c) => c.header === 'LPO Reference')!;
+        [null, {}, { lpoNumber: 'required' }, { lpoNumber: 'hidden' }].forEach((config) => {
+            expect(stateOf(spec, config)).toBe('optional');
+            expect(assetImportHeaders(config)).toContain('LPO Reference');
+        });
+    });
+
     /** RAM on a Fleet sheet is noise; on IT Equipment it is the point. */
     it('includes the IT block only where the category asks for it', () => {
         expect(assetImportHeaders(null)).not.toContain('RAM');
@@ -78,7 +90,7 @@ describe('asset import columns', () => {
         const dtoFields = [
             'no', 'assetName', 'engravedNumber', 'serialNumber', 'tagName', 'commodity', 'supplier',
             'location', 'assignedTo', 'status', 'dateReceived', 'purchaseCost', 'costOfTheAsset',
-            'netBookValue', 'depreciationRate', 'unitOfMeasure', 'make', 'model', 'description',
+            'netBookValue', 'depreciationRate', 'unitOfMeasure', 'lpoReference', 'make', 'model', 'description',
             'hostname', 'ipAddress', 'macAddress', 'ram', 'cpuSpeed', 'hardDiskSize', 'interfaceType',
         ];
 
