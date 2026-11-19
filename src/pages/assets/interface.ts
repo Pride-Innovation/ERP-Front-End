@@ -185,6 +185,14 @@ export interface IAssetForm {
      * order's and is shown read-only; without one, the form offers an optional typed LPO reference.
      */
     hasStockOrder?: boolean;
+    /**
+     * Update form only: the saved Supplier and Assigned To, as options, so the server-searched
+     * pickers show the current choice before anything is fetched.
+     */
+    initialOptions?: {
+        supplier?: { value: number; label: string } | null;
+        assignedTo?: { value: number; label: string } | null;
+    };
     userParams?: Record<string, any>;
     supplierParams?: Record<string, any>;
     branchParams?: Record<string, any>;

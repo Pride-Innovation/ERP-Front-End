@@ -10,9 +10,7 @@ import OfficeEquipmentUtills from "./formUtills";
 import { IOfficeEquipmentForm } from "../interface";
 import BranchUtills from "../../settings/branch/utills";
 import StatusUtills from "../../settings/statuses/Utills";
-import UserUtils from "../../users/utils";
 import AssetTypeUtills from "../../settings/assetTypes/utills";
-import SupplierUtills from "../../settings/suppliers/Utills";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import CommodityUtills from "../../settings/commodity/utills";
@@ -31,6 +29,7 @@ const OfficeEquipmentForm = ({
     sendingRequest,
     lpoParams,
     hasStockOrder,
+    initialOptions,
     userParams,
     supplierParams,
     branchParams,
@@ -44,9 +43,7 @@ const OfficeEquipmentForm = ({
     const { formFields, determineOfficeAssetType } = OfficeEquipmentUtills();
     const { fetchAllBranches } = BranchUtills();
     const { fetchAllStatuses } = StatusUtills();
-    const { fetchStaffOptions } = UserUtils();
     const { fetchAllAssetTypes } = AssetTypeUtills();
-    const { fetchAllSuppliers } = SupplierUtills();
     const { fetchAllCommodities } = CommodityUtills();
     const { fetchInventory } = InventoryUtills();
 
@@ -55,12 +52,12 @@ const OfficeEquipmentForm = ({
         const fetchData = async () => {
             setLoading(true);
             try {
+                // Supplier and Assigned To are not preloaded: their pickers search the server
+                // themselves (see SteppedAssetForm).
                 await Promise.all([
                     fetchAllBranches(branchParams),
                     fetchAllStatuses(),
-                    fetchStaffOptions(userParams),
                     fetchAllAssetTypes(),
-                    fetchAllSuppliers(supplierParams),
                     fetchInventory(lpoParams)
                 ]);
             } catch (error) {
@@ -121,6 +118,7 @@ const OfficeEquipmentForm = ({
             loading={loading}
             trigger={trigger}
             lpoParams={lpoParams}
+            initialOptions={initialOptions}
             userParams={userParams}
             supplierParams={supplierParams}
             branchParams={branchParams}

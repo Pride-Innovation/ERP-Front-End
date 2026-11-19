@@ -235,7 +235,9 @@ const AsyncAutocomplete = <TForm extends FieldValues>({
             name={name}
             render={({ field }) => (
                 <Autocomplete
-                    value={selected}
+                    // The form owns the value: once it is cleared (a form reset, "Save & add
+                    // another") the field shows nothing, rather than the last label beside an empty value.
+                    value={field.value === null || field.value === undefined || field.value === '' ? null : selected}
                     open={open}
                     onOpen={() => setOpen(true)}
                     onClose={() => setOpen(false)}
