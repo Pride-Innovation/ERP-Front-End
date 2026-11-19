@@ -27,6 +27,8 @@ import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import InfoIcon from '@mui/icons-material/Info';
 import LayersIcon from '@mui/icons-material/Layers';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import { useWatch } from 'react-hook-form';
+import { unitOptions, useUnitsOfMeasure } from '../unitsOfMeasure/unitsOfMeasure';
 
 const CommodityForm = ({
     register,
@@ -39,6 +41,8 @@ const CommodityForm = ({
 }: ICommodityForm) => {
     const { formFields } = CommodityUtills();
     const theme = useTheme();
+    const { units, error: unitsError } = useUnitsOfMeasure();
+    const currentUnit = useWatch({ control: control as any, name: 'groupName' }) as string | undefined;
 
     // Section component for better organization
     const FormSection = ({
@@ -97,7 +101,11 @@ const CommodityForm = ({
 
     // Group fields by type
     const basicFields = formFields.filter(field => ['name'].includes(field.value));
-    const measurementFields = formFields.filter(field => ['groupName'].includes(field.value));
+    // Chosen from Settings → Units of Measure rather than typed, so every commodity spells a unit the
+    // same way. The commodity's own unit stays selectable even if it has since been switched off.
+    const measurementFields = formFields
+        .filter(field => ['groupName'].includes(field.value))
+        .map(field => ({ ...field, type: 'select', options: unitOptions(units, currentUnit) }));
     const classificationFields = formFields.filter(field => ['assetType'].includes(field.value));
 
     // Render field with proper component type
@@ -161,6 +169,16 @@ const CommodityForm = ({
                         {renderField(field)}
                     </Grid>
                 ))}
+                {unitsError && (
+                    <Grid item xs={12}>
+                        <Typography variant="body2" color="error">{unitsError}</Typography>
+                    </Grid>
+                )}
+                <Grid item xs={12}>
+                    <Typography variant="caption" sx={{ color: '#64748B' }}>
+                        Missing a unit? Add it in Settings → Units of Measure.
+                    </Typography>
+                </Grid>
             </FormSection>
 
             {/* Asset Classification */}

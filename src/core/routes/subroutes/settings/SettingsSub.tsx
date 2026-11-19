@@ -19,6 +19,7 @@ import Units from "../../../../pages/settings/units"
 import Consultants from "../../../../pages/settings/consultants"
 import Couriers from "../../../../pages/settings/couriers"
 import ExportColumns from "../../../../pages/settings/exportColumns"
+import UnitsOfMeasure from "../../../../pages/settings/unitsOfMeasure"
 
 const SettingsSubRoutes = () => {
     return (
@@ -35,6 +36,7 @@ const SettingsSubRoutes = () => {
             <Route path={ROUTES.CONSULTANTS} element={<Consultants />} />
             <Route path={ROUTES.COURIERS} element={<Couriers />} />
             <Route path={ROUTES.EXPORT_COLUMNS} element={<ExportColumns />} />
+            <Route path={ROUTES.UNITS_OF_MEASURE} element={<UnitsOfMeasure />} />
         </Route>
     )
 }

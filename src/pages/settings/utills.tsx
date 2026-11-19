@@ -19,6 +19,7 @@ import GroupWorkOutlinedIcon from '@mui/icons-material/GroupWorkOutlined';
 import EngineeringOutlinedIcon from '@mui/icons-material/EngineeringOutlined';
 import DeliveryDiningOutlinedIcon from '@mui/icons-material/DeliveryDiningOutlined';
 import ViewColumnOutlinedIcon from '@mui/icons-material/ViewColumnOutlined';
+import StraightenOutlinedIcon from '@mui/icons-material/StraightenOutlined';
 
 const SettingsUtills = () => {
 
@@ -40,6 +41,13 @@ const SettingsUtills = () => {
             text: "Commodities",
             path: ROUTES.COMMODITY,
             icon: <CategoryOutlinedIcon />
+        },
+        {
+            id: 13,
+            // Not "Units": that page is the organisational units (Admin, Infra).
+            text: "Units of Measure",
+            path: ROUTES.UNITS_OF_MEASURE,
+            icon: <StraightenOutlinedIcon />
         },
         {
             id: 4,

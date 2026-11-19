@@ -5,8 +5,10 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Control, useController, useWatch } from "react-hook-form";
 import OfficeEquipmentUtills from "./formUtills";
+import { normaliseUnit, unitOptions, useUnitsOfMeasure } from "../../settings/unitsOfMeasure/unitsOfMeasure";
 import { IOfficeEquipmentForm } from "../interface";
 import BranchUtills from "../../settings/branch/utills";
 import StatusUtills from "../../settings/statuses/Utills";
@@ -17,6 +19,33 @@ import CommodityUtills from "../../settings/commodity/utills";
 import InventoryUtills from "../../inventory/Utills";
 import SteppedOfficeEquipmentForm from "./SteppedAssetForm";
 import { useAssetFieldConfig } from "../../../hooks/useAssetFieldConfig";
+
+/**
+ * Fills the asset's Unit of Measure from its commodity - the default decided with V34, which an asset
+ * may then differ from.
+ *
+ * <p>The unit follows the commodity when one is chosen, and again whenever it changes. A form that
+ * opens with a unit already set (an asset being edited) keeps it; one that opens without (a received
+ * or imported asset with none) is filled in. Renders nothing.
+ */
+const UnitFromCommodity = ({ control }: { control: Control<any> }) => {
+    const category = useWatch({ control, name: 'category' });
+    const { field } = useController({ control, name: 'unitOfMeasure' });
+    const { commodities } = useSelector((state: RootState) => state.CommodityStore);
+    const previous = useRef<unknown>(undefined);
+
+    useEffect(() => {
+        const commodity = commodities?.find((c) => String(c.id) === String(category));
+        const unit = normaliseUnit(commodity?.groupName);
+        const changed = previous.current !== undefined && String(previous.current ?? '') !== String(category ?? '');
+        if (category !== undefined) previous.current = category;
+        if (!unit) return;
+        if (changed || !normaliseUnit(field.value)) field.onChange(unit);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [category, commodities]);
+
+    return null;
+};
 
 const OfficeEquipmentForm = ({
     formState,
@@ -100,11 +129,20 @@ const OfficeEquipmentForm = ({
      * On update the order's LPO is never required — it cannot be changed, so it cannot be missing.
      */
     const useTypedReference = isUpdate && !hasStockOrder;
+
+    // Units come from Settings → Units of Measure; the asset's own unit stays selectable even if it
+    // has since been switched off, or the field would open empty.
+    const { units } = useUnitsOfMeasure();
+    const currentUnit = useWatch({ control: control as any, name: 'unitOfMeasure' }) as string | undefined;
+
     const configuredFormFields = applyToFormFields(formFields)
         .filter(field => field.value !== (useTypedReference ? 'lpoNumber' : 'lpoReference'))
-        .map(field => (isUpdate && field.value === 'lpoNumber' ? { ...field, required: false } : field));
+        .map(field => (isUpdate && field.value === 'lpoNumber' ? { ...field, required: false } : field))
+        .map(field => (field.value === 'unitOfMeasure' ? { ...field, options: unitOptions(units, currentUnit) } : field));
 
     return (
+        <>
+        <UnitFromCommodity control={control as any} />
         <SteppedOfficeEquipmentForm
             formState={formState}
             control={control}
@@ -123,6 +161,7 @@ const OfficeEquipmentForm = ({
             supplierParams={supplierParams}
             branchParams={branchParams}
         />
+        </>
     );
 };
 

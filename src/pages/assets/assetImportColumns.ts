@@ -36,7 +36,7 @@ export interface ColumnSpec {
     /** Hidden unless `fieldConfig` explicitly enables it (the IT-only block). */
     optIn?: boolean;
     /** Defined name of the dropdown source, when the column has one. */
-    list?: 'BranchList' | 'SupplierList' | 'CommodityList' | 'StatusList' | 'StaffList';
+    list?: 'BranchList' | 'SupplierList' | 'CommodityList' | 'StatusList' | 'StaffList' | 'UnitList';
     /** Excel number format — dates and money read wrongly without one. */
     numFmt?: string;
     /** Shown in the cell's input prompt, and on the Notes sheet. */
@@ -98,7 +98,11 @@ export const ASSET_IMPORT_COLUMNS: ColumnSpec[] = [
     { header: 'Cost of the Asset', configKey: 'costOfTheAsset', width: 18, numFmt: '#,##0.00' },
     { header: 'Net Book Value', configKey: 'netValueB', width: 16 },
     { header: 'Depreciation Rate', configKey: 'assetDepreciationRate', width: 16, hint: 'e.g. 25% or 0.25.' },
-    { header: 'Unit of Measure', configKey: 'unitOfMeasure', width: 16, sample: 'Each' },
+    {
+        header: 'Unit of Measure', configKey: 'unitOfMeasure', width: 16, list: 'UnitList',
+        hint: "Pick from the list, or leave blank to use the commodity's unit.",
+        sample: 'pieces',
+    },
     /*
      * No configKey, deliberately: always offered, never required. An imported asset has no stock
      * order, and the form's `lpoNumber` setting is about choosing one — it must not be able to make

@@ -61,6 +61,7 @@ export const downloadAssetImportTemplate = async (assetTypeId: number): Promise<
         { name: 'CommodityList', values: meta.commodities ?? [] },
         { name: 'StatusList', values: meta.statuses ?? [] },
         { name: 'StaffList', values: meta.staff ?? [] },
+        { name: 'UnitList', values: meta.unitsOfMeasure ?? [] },
     ];
 
     sources.forEach((source, i) => {
