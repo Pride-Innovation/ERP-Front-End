@@ -19,6 +19,29 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const PRIMARY_COLOR = '#08796C';
 
+/*
+ * Read-only fields (derived values such as Net Value or Depreciation Rate, and figures locked after
+ * stocking) are still read, often more than the editable ones. They used to be dimmed with
+ * `opacity: 0.7` on top of MUI's own grey disabled text, which left the value barely legible. A
+ * read-only field should look *not editable*, not *not there*: a flat tinted background, a lighter
+ * border and a not-allowed cursor say that, and the value stays in dark text.
+ *
+ * `-webkit-text-fill-color` is required — MUI sets it on a disabled input, and `color` alone loses.
+ */
+export const disabledInputRootSx = {
+    backgroundColor: '#EEF1F4',
+    cursor: 'not-allowed',
+    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0, 0, 0, 0.12)' },
+    '& .MuiInputBase-input.Mui-disabled, & .MuiAutocomplete-input.Mui-disabled': {
+        color: '#1F2937',
+        WebkitTextFillColor: '#1F2937',
+        cursor: 'not-allowed',
+    },
+    '& .MuiSvgIcon-root': { color: 'rgba(0, 0, 0, 0.3)' },
+};
+
+export const disabledLabelSx = { color: 'rgba(0, 0, 0, 0.6)' };
+
 export const fieldSx = {
     '& .MuiOutlinedInput-root': {
         borderRadius: '8px',
@@ -35,10 +58,7 @@ export const fieldSx = {
                 boxShadow: `0 0 0 3px ${PRIMARY_COLOR}18`,
             },
         },
-        '&.Mui-disabled': {
-            backgroundColor: '#F3F4F6',
-            opacity: 0.7,
-        },
+        '&.Mui-disabled': disabledInputRootSx,
         '&.Mui-error .MuiOutlinedInput-notchedOutline': {
             borderColor: '#D32F2F',
         },
@@ -51,6 +71,7 @@ export const fieldSx = {
         fontSize: '0.9375rem',
         '&.Mui-focused': { color: PRIMARY_COLOR },
         '&.Mui-error': { color: '#D32F2F' },
+        '&.Mui-disabled': disabledLabelSx,
     },
     '& .MuiInputLabel-outlined:not(.MuiInputLabel-shrink)': {
         transform: 'translate(14px, 13px) scale(1)',

@@ -63,6 +63,11 @@ export interface IAsset {
     assetType?: IAssetType | null;
     category?: string | null;
     lpoNumber: string;
+    /**
+     * An LPO kept as text, for an asset with no stock order (one brought in by the import). A
+     * reference only — a received asset's LPO is `stock.lpoNumber`, and nothing links by this.
+     */
+    lpoReference?: string | null;
     commodity?: ICommodity | null;
     stock?: IInventory | null;
     lastRepairedBy?: string | null;
@@ -175,6 +180,11 @@ export interface IAssetForm {
     option?: string | undefined;
     handleChange?: (event: SelectChangeEvent) => void;
     lpoParams?: Record<string, any>;
+    /**
+     * Update form only: whether the asset was received on a stock order. With one, its LPO is the
+     * order's and is shown read-only; without one, the form offers an optional typed LPO reference.
+     */
+    hasStockOrder?: boolean;
     userParams?: Record<string, any>;
     supplierParams?: Record<string, any>;
     branchParams?: Record<string, any>;

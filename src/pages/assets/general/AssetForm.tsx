@@ -30,6 +30,7 @@ const OfficeEquipmentForm = ({
     onSecondaryIntent,
     sendingRequest,
     lpoParams,
+    hasStockOrder,
     userParams,
     supplierParams,
     branchParams,
@@ -92,7 +93,19 @@ const OfficeEquipmentForm = ({
     }, [assetTypeId]);
 
     const { applyToFormFields } = useAssetFieldConfig(assetTypeId);
-    const configuredFormFields = applyToFormFields(formFields);
+    const isUpdate = !!lpoParams;
+
+    /*
+     * One LPO slot, filled one of two ways:
+     *   - create, or an asset received on a stock order → the order's LPO (read-only on update);
+     *   - an asset with no order (imported) → an optional typed reference.
+     * Showing both would offer an empty, locked "LPO Number" beside the box that can be filled in.
+     * On update the order's LPO is never required — it cannot be changed, so it cannot be missing.
+     */
+    const useTypedReference = isUpdate && !hasStockOrder;
+    const configuredFormFields = applyToFormFields(formFields)
+        .filter(field => field.value !== (useTypedReference ? 'lpoNumber' : 'lpoReference'))
+        .map(field => (isUpdate && field.value === 'lpoNumber' ? { ...field, required: false } : field));
 
     return (
         <SteppedOfficeEquipmentForm
@@ -104,7 +117,7 @@ const OfficeEquipmentForm = ({
             onSecondaryIntent={onSecondaryIntent}
             sendingRequest={sendingRequest}
             formFields={configuredFormFields}
-            isUpdate={!!lpoParams}
+            isUpdate={isUpdate}
             loading={loading}
             trigger={trigger}
             lpoParams={lpoParams}

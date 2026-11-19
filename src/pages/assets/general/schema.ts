@@ -51,8 +51,16 @@ const mixedField = (
 /**
  * Builds a Yup validation schema driven by the asset type's fieldConfig.
  * Pass `null` or `undefined` to get the original static schema behaviour.
+ *
+ * <p>The LPO differs between the two forms. Creating an asset registers it against a stock order, so
+ * the order's LPO follows the category's configuration (required by default). An edit never changes
+ * the order, so there it is never required: an imported asset has no order at all, and requiring one
+ * used to make every imported asset impossible to save.
  */
-export const buildOfficeEquipmentSchema = (fieldConfig?: IAssetFieldConfig | null) =>
+export const buildOfficeEquipmentSchema = (
+    fieldConfig?: IAssetFieldConfig | null,
+    { isUpdate = false }: { isUpdate?: boolean } = {},
+) =>
     yup.object().shape({
         // ── Identification (hard-coded defaults: required) ──────────────────
         assetName:          strField(fieldConfig, 'assetName',          'Asset name is required',        true),
@@ -67,7 +75,11 @@ export const buildOfficeEquipmentSchema = (fieldConfig?: IAssetFieldConfig | nul
         assetDepreciationRate: strField(fieldConfig, 'assetDepreciationRate', 'Depreciation rate is required', false),
         // ── Dates & References ───────────────────────────────────────────────
         dateReceipt:        strField(fieldConfig, 'dateReceipt',        'Receipt date is required',      true),
-        lpoNumber:          strField(fieldConfig, 'lpoNumber',          'LPO Number is required',        true),
+        lpoNumber:          isUpdate
+                                ? yup.string().nullable().optional()
+                                : strField(fieldConfig, 'lpoNumber', 'LPO Number is required', true),
+        lpoReference:       yup.string().nullable().optional()
+                                .max(100, 'The LPO reference may be at most 100 characters'),
         // ── Classification ───────────────────────────────────────────────────
         unitOfMeasure:      strField(fieldConfig, 'unitOfMeasure',      'Unit of measure is required',   true),
         category:           strField(fieldConfig, 'category',           'Category is required',          false),

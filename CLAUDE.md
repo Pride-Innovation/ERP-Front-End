@@ -3292,6 +3292,37 @@ Tests use a mock server, never the real API (five failures throttle a real emplo
 `DirectoryAuthClientTest`, `DirectorySignInTest`, `DirectoryUsernameTest`, `axiosSignIn.test.ts`.
 Verified non-vacuous by making a refused password retryable and by switching off the identity check.
 
+## An asset's LPO: the order's, or a typed reference (V33)
+
+**Editing an imported asset was impossible.** The edit form required "LPO Number" while showing it
+disabled, and `AssetService.updateAsset` looked a stock order up by the LPO the form sent
+(`findStockByLPONumber`) — a `NotFoundException` for any asset with no order, which is **every
+imported asset** (the import builds no `Stock`). The lookup never relinked anything; it only marked
+whichever order matched as `canNotBeDeleted`.
+
+- **An edit uses the asset's own order** (`asset.getStock()`), and locks it as before. The LPO the form
+  sends is ignored on update — an edit never moves an asset to another order.
+- **`asset.lpo_reference`** (V33, plus `asset_aud`, trap #5): optional text, at most 100, trimmed, blank =
+  none (`AssetService.lpoReferenceOf`). A reference only — nothing looks an order up by it. Set by the
+  import's new optional **"LPO Reference"** column (no `configKey`: the category's `lpoNumber` setting is
+  about choosing an order and can neither hide nor require it; an overlong value is a row error), and by
+  an edit **only while the asset has no order**.
+- **The form shows one LPO slot**: create and received assets get the order's LPO (pickable on create,
+  read-only and never required on update — `buildOfficeEquipmentSchema(config, { isUpdate })`); an asset
+  with no order gets the "LPO Reference" box. The detail page labels a typed one *"LPO Reference
+  (recorded, no stock order)"*.
+- **Create still needs an order** — it counts the asset against one — and a blank LPO is now a **400**
+  naming that, not the lookup's `NotFoundException` (which answers 200 here). The create form's LPO
+  field had been `disabled` *and* required, so create could not get past it; it is pickable now.
+- **Read-only fields are legible.** `fieldSx` / `autocompleteSx` dimmed disabled fields with
+  `opacity: 0.7` over MUI's grey text. Now `disabledInputRootSx` (`Inputs.tsx`): tinted background, dark
+  value text (`-webkit-text-fill-color`, which `color` alone loses to), not-allowed cursor.
+
+`AssetLpoReferenceTest`: import keeps/trims/blanks the reference and links no order; an overlong one is a
+row error; an imported asset is edited with no LPO and its reference set and cleared; a received asset
+keeps its order and ignores a typed reference; create without an LPO is a 400. Restoring the old lookup
+fails both edit cases with `Stock with LPO Number: null is not found` — the reported bug.
+
 ## Still open
 
 **1. Permissions gating across the app — front-end sweep done.** Row menus are now filtered
@@ -3949,6 +3980,46 @@ to act next. All of the following is frontend only.
   menu. Narrowing only changes what is shown; every line is still saved and submitted.
 
 `stockTakeProgress.test.ts` pins this. Adding cancel to "needs my action" fails two of its cases.
+
+### Asset-tracked categories are not counted, and the adjustment history is paged
+
+**A count sheet holds consumable lines only** (`StockTakeService.isCountableLine`). Receiving goods
+credits a quantity line for *every* commodity (`StockService` → `addCommoditiesToStore`) **and**, for a
+category with `tracksAssets` (Computers, Equipment, Furniture, Vehicle/Fleet, Security, Financial &
+Banking Equipment), creates one asset record per unit. Only the asset records follow the item after
+that: `InventoryService.applyMovementCompletion` relocates an asset line and **leaves the quantity
+alone**, while a direct issuance debits it. So "Laptop: 5" in an Admin store is not a count of laptops
+on the shelf, and counting against it reported ordinary transfers as losses, then "corrected" a number
+nothing else agreed with without saying which laptop was missing. This was reported from screenshots
+showing Laptop, Tablet, CPU lines on a sheet, after I had wrongly said assets were never counted — the
+old refusal fired only for a store with **no** lines at all.
+
+- Opening a count skips those lines; choosing a tracked category for a count is refused; the Open
+  dialog's store list counts only countable lines, so a store holding nothing else is not offered.
+  Sheets already open are left as they are.
+- **Assets are verified asset by asset** (scan each tag: found / missing / found elsewhere) — proposed,
+  not built. **The double bookkeeping itself is still there**: removing the quantity line for tracked
+  categories is a separate decision, because direct issuance and `StockAvailabilityService` read it.
+- *Whether a category is counted is its `tracksAssets` setting, not the item* — "Coffee Machine /
+  Kettle / Microwave" is under Kitchen & Groceries (off), so it is counted as a quantity.
+
+**`GET /stock-adjustments` is filtered and paged by the server** — `storeId`, `branchId`, `reason`
+(unknown → 400), `assetTypeId`, `search` (commodity), `from`/`to`, `pageNumber`, `pageSize` (≤ 5000).
+It used to return the whole history and the page drew it all, with no filter and no export.
+Scoping stays the count listing's per-row rule (`storeIsInScope`), so the server reads the viewer's
+adjustments, narrows, filters, totals and cuts the page **in memory** — the same order "Assets Held"
+uses, for the same reason (a page cut before the scope gives wrong totals). Totals (`byReason`,
+`totalLines`, units) are over everything matching, never the page; `storeOptions` / `categoryOptions`
+are not narrowed by the active filters. A branch named out of reach is refused. Rows now carry branch,
+category and who posted. The page's stat tiles keep their all-time figures from a `pageSize=1` read.
+
+`AdjustmentHistory.tsx` / `stockAdjustments.ts`: local whole-day dates (never `toISOString`), PDF /
+Excel / CSV through the shared exporters under registry key `stockAdjustments`, refetching up to 5000
+rows and saying so when that cuts the file short, with the active filters on the PDF strip.
+`StockTakeAssetsAndHistoryTest` builds its own mixed store inside the rolled-back transaction (the
+development data has no free store holding both kinds of line); verified non-vacuous by removing the
+exclusion. `StockTakeBranchRuleTest` now skips stores with an unfinished count rather than failing on
+the development data's open Mbarara count — on today's data that leaves it unexercised, and it says so.
 
 ### Stock take maker-checker, and telling the approvers
 

@@ -99,6 +99,15 @@ export const ASSET_IMPORT_COLUMNS: ColumnSpec[] = [
     { header: 'Net Book Value', configKey: 'netValueB', width: 16 },
     { header: 'Depreciation Rate', configKey: 'assetDepreciationRate', width: 16, hint: 'e.g. 25% or 0.25.' },
     { header: 'Unit of Measure', configKey: 'unitOfMeasure', width: 16, sample: 'Each' },
+    /*
+     * No configKey, deliberately: always offered, never required. An imported asset has no stock
+     * order, and the form's `lpoNumber` setting is about choosing one — it must not be able to make
+     * an old record's LPO compulsory, or hide the only place one can be kept.
+     */
+    {
+        header: 'LPO Reference', width: 18,
+        hint: 'Optional. The LPO number, if the record still has one. Kept as a reference only; it is not linked to a stock order.',
+    },
 
     // ── Descriptive ──────────────────────────────────────────────────────────
     { header: 'Make', configKey: 'make', width: 18, sample: 'Dell' },

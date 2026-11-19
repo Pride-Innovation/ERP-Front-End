@@ -68,7 +68,8 @@ const UpdateGeneralAsset = () => {
                     hostname: response.data.hostname || '',
                     detailNetBookValue: response.data.detailNetBookValue || '',
                     make: response.data.make || '',
-                    lpoNumber: response.data.stock?.lpoNumber
+                    lpoNumber: response.data.stock?.lpoNumber,
+                    lpoReference: response.data.lpoReference || '',
                 });
             } else {
                 toast.error('Failed to load asset details');
@@ -82,7 +83,8 @@ const UpdateGeneralAsset = () => {
 
     useEffect(() => { findAssetByID(); }, [id]);
 
-    const schema = buildOfficeEquipmentSchema(assetType?.fieldConfig);
+    const schema = buildOfficeEquipmentSchema(assetType?.fieldConfig, { isUpdate: true });
+    const hasStockOrder = Boolean(defaultAsset?.stock);
 
     const {
         control,
@@ -211,6 +213,7 @@ const UpdateGeneralAsset = () => {
                         sendingRequest={sendingRequest}
                         register={register}
                         lpoParams={{ lpoNumber: params?.lpoNumber }}
+                        hasStockOrder={hasStockOrder}
                         userParams={{ firstName: params?.assignedToFirstName }}
                         supplierParams={{ name: params?.supplierName }}
                         branchParams={{ name: params?.branchName }}
