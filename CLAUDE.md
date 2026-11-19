@@ -3318,6 +3318,15 @@ whichever order matched as `canNotBeDeleted`.
   `opacity: 0.7` over MUI's grey text. Now `disabledInputRootSx` (`Inputs.tsx`): tinted background, dark
   value text (`-webkit-text-fill-color`, which `color` alone loses to), not-allowed cursor.
 
+**The edit form also could not show the holder.** `buildAssetDao` built the holder without `.id(...)`
+(the supplier beside it always had one), so the form, which binds by id, opened with Assigned To
+empty. Saving it as it opened then sent no holder; `updateAsset` read that as a reassignment to nobody,
+and the history row it writes has a `NOT NULL` user, so **every untouched save of a held asset failed**
+— nothing was ever unassigned. `AssetHolderRoundTripTest` pins the id and the untouched round trip.
+Supplier and Assigned To on that form are `AsyncAutocomplete` now (server search, "Load more", the saved
+choice shown on open): the old picker searched staff with `firstName`, which `/users/picker` does not
+read, so only the first ten people were ever offered.
+
 `AssetLpoReferenceTest`: import keeps/trims/blanks the reference and links no order; an overlong one is a
 row error; an imported asset is edited with no LPO and its reference set and cleared; a received asset
 keeps its order and ignores a typed reference; create without an LPO is a 400. Restoring the old lookup
