@@ -59,7 +59,10 @@ describe('asset import columns', () => {
      */
     it('always offers LPO Reference, and never requires it', () => {
         const spec = ASSET_IMPORT_COLUMNS.find((c) => c.header === 'LPO Reference')!;
-        [null, {}, { lpoNumber: 'required' }, { lpoNumber: 'hidden' }].forEach((config) => {
+        const configs: Array<Record<string, string> | null> = [
+            null, {}, { lpoNumber: 'required' }, { lpoNumber: 'hidden' },
+        ];
+        configs.forEach((config) => {
             expect(stateOf(spec, config)).toBe('optional');
             expect(assetImportHeaders(config)).toContain('LPO Reference');
         });
