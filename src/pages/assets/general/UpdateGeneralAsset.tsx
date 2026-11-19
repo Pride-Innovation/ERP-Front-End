@@ -26,6 +26,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import { ROUTES } from '../../../core/routes/routes';
+import { staffOptionLabel } from '../../users/service/staffPicker';
 
 const PRIMARY_COLOR = '#08796C';
 
@@ -47,11 +48,20 @@ const UpdateGeneralAsset = () => {
             const response = await getOfficeEquipmentByIDService(id as string) as IOfficeEquipmentAxiosResponse;
             if (response.status === 200) {
                 setAssetName(response.data.assetName || assetType?.name || 'Asset');
+                const holder = response.data.assignedTo;
+                const supplier = response.data.supplier;
                 setParams({
                     branchName: response.data.branch?.name,
-                    assignedToFirstName: response.data.assignedTo?.firstName,
                     lpoNumber: response.data.stock?.lpoNumber,
-                    supplierName: response.data.supplier?.name
+                    // The saved choices, so the server-searched pickers show them immediately.
+                    initialOptions: {
+                        assignedTo: holder?.id
+                            ? { value: Number(holder.id), label: staffOptionLabel(holder as any) }
+                            : null,
+                        supplier: supplier?.id
+                            ? { value: Number(supplier.id), label: supplier.name }
+                            : null,
+                    },
                 });
                 setDefaultAsset({
                     ...response.data,
@@ -214,8 +224,7 @@ const UpdateGeneralAsset = () => {
                         register={register}
                         lpoParams={{ lpoNumber: params?.lpoNumber }}
                         hasStockOrder={hasStockOrder}
-                        userParams={{ firstName: params?.assignedToFirstName }}
-                        supplierParams={{ name: params?.supplierName }}
+                        initialOptions={params?.initialOptions}
                         branchParams={{ name: params?.branchName }}
                         trigger={trigger}
                         overrideAssetTypeId={typeId ? Number(typeId) : undefined}

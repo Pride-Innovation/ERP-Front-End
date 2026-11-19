@@ -40,6 +40,41 @@ import MemoryOutlinedIcon from '@mui/icons-material/MemoryOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import CloseIcon from '@mui/icons-material/Close';
 import { toast } from "react-toastify";
+import AsyncAutocomplete from "../../../components/forms/AsyncAutocomplete";
+import { fetchStaffOptionsService, staffOptionLabel } from "../../users/service/staffPicker";
+import { fetchSuppliersService } from "../../settings/suppliers/service";
+
+/*
+ * Supplier and Assigned To are searched on the server, a page at a time, as the user types - the
+ * pattern the assets register filter and the user form already use. They used the shared
+ * Autocomplete over one preloaded page: the staff search sent `firstName`, which the picker does not
+ * read, so only the first ten people were ever offered, and a saved holder outside those ten showed
+ * as an empty field.
+ */
+const fetchAssigneePage = async (query: string, page: number, pageSize: number) => {
+    try {
+        const { content, totalElements } = await fetchStaffOptionsService({ name: query, pageNumber: page, pageSize });
+        return { options: content.map((u) => ({ value: u.id, label: staffOptionLabel(u) })), totalElements };
+    } catch {
+        return { options: [], totalElements: 0 };
+    }
+};
+
+const fetchSupplierPage = async (query: string, page: number, pageSize: number) => {
+    const res: any = await fetchSuppliersService({ name: query?.trim() || undefined, pageNumber: page, pageSize });
+    // Trap #6: a failure arrives as a value, not a throw.
+    if (res?.status !== 200) return { options: [], totalElements: 0 };
+    const content = res.data?.content ?? [];
+    return {
+        options: content.map((s: any) => ({ value: s.id, label: s.name })),
+        totalElements: res.data?.totalElements ?? content.length,
+    };
+};
+
+const SERVER_SEARCHED: Record<string, typeof fetchAssigneePage> = {
+    assignedTo: fetchAssigneePage,
+    supplier: fetchSupplierPage,
+};
 
 const P = brand[500];
 
@@ -54,6 +89,7 @@ const SteppedOfficeEquipmentForm = ({
     formFields,
     trigger,
     isUpdate,
+    initialOptions,
 }: IOfficeEquipmentForm) => {
     const [activeStep, setActiveStep] = useState(0);
     const navigate = useNavigate();
@@ -255,7 +291,19 @@ const SteppedOfficeEquipmentForm = ({
                                         {field.type === "number" && <UseFormInput {...commonProps} type="number" />}
                                         {field.type === "select" && <UseFormSelect {...commonProps} options={field.options} />}
                                         {field.type === "date" && <UseFormDatePicker {...commonProps} />}
-                                        {field.type === "autocomplete" && <UseFormAutocompleteComponent {...commonProps} options={field.options} />}
+                                        {field.type === "autocomplete" && SERVER_SEARCHED[field.value] && (
+                                            <AsyncAutocomplete
+                                                control={control as any}
+                                                name={field.value}
+                                                label={field.label}
+                                                required={commonProps.required}
+                                                disabled={commonProps.disabled}
+                                                error={(formState.errors as any)?.[field.value]}
+                                                fetchPage={SERVER_SEARCHED[field.value]}
+                                                initialOption={(initialOptions as any)?.[field.value] ?? null}
+                                            />
+                                        )}
+                                        {field.type === "autocomplete" && !SERVER_SEARCHED[field.value] && <UseFormAutocompleteComponent {...commonProps} options={field.options} />}
                                     </Grid>
                                 );
                             })}
