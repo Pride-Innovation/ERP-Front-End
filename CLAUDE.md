@@ -3327,6 +3327,15 @@ Supplier and Assigned To on that form are `AsyncAutocomplete` now (server search
 choice shown on open): the old picker searched staff with `firstName`, which `/users/picker` does not
 read, so only the first ten people were ever offered.
 
+**And the edit page started from sample data.** `UpdateGeneralAsset` initialised its form from
+`officeEquipmentMock[0]` — a fake asset whose `supplier` and `assignedTo` are whole objects — then reset
+it with the real asset mapped to ids, `undefined` where a reference was missing. A react-hook-form
+`reset` treats `undefined` as *not provided*, so the mock's object survived and was sent:
+`Cannot deserialize value of type java.lang.Long from Object value ... AssetDTO["supplier"]`. Every edit
+of an asset with no supplier (or no holder) failed this way. The form now starts empty and renders only
+once the asset has loaded, maps a missing reference to `null`, and `referenceId` turns every reference
+into an id or `null` at submit.
+
 `AssetLpoReferenceTest`: import keeps/trims/blanks the reference and links no order; an overlong one is a
 row error; an imported asset is edited with no LPO and its reference set and cleared; a received asset
 keeps its order and ignores a typed reference; create without an LPO is a 400. Restoring the old lookup

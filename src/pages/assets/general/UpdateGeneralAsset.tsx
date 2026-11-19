@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { IOfficeEquipment, IOfficeEquipmentAxiosResponse } from '../interface';
 import { useNavigate, useParams } from 'react-router';
-import { officeEquipmentMock } from '../../../mocks/officeEquipment';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { buildOfficeEquipmentSchema } from './schema';
@@ -27,14 +26,20 @@ import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutl
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import { ROUTES } from '../../../core/routes/routes';
 import { staffOptionLabel } from '../../users/service/staffPicker';
+import { referenceId } from './referenceId';
 
 const PRIMARY_COLOR = '#08796C';
-
 const UpdateGeneralAsset = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const { typeId, id } = useParams<{ typeId: string; id: string }>();
-    const [defaultAsset, setDefaultAsset] = useState<any>(officeEquipmentMock[0]);
+    /*
+     * Null until the asset has loaded - never sample data. This used to start as a mock asset whose
+     * supplier and holder were whole objects. When the real asset had no supplier, the mapping below
+     * produced `undefined`, which a form reset treats as "not provided", so the mock's supplier object
+     * stayed in the form and was sent: the server cannot read an object as an id, and the save failed.
+     */
+    const [defaultAsset, setDefaultAsset] = useState<any>(null);
     const [params, setParams] = useState<Record<string, any>>({});
     const [assetName, setAssetName] = useState<string>('Asset');
     const dispatch = useDispatch<AppDispatch>();
@@ -65,12 +70,13 @@ const UpdateGeneralAsset = () => {
                 });
                 setDefaultAsset({
                     ...response.data,
-                    supplier: response.data.supplier?.id,
-                    assignedTo: response.data.assignedTo?.id,
-                    branch: response.data.branch?.id,
-                    assetStatus: response.data.assetStatus?.id,
-                    assetType: response.data.assetType?.id,
-                    category: response.data.commodity?.id,
+                    // `null`, never `undefined`, for a missing reference - see the note on the state.
+                    supplier: response.data.supplier?.id ?? null,
+                    assignedTo: response.data.assignedTo?.id ?? null,
+                    branch: response.data.branch?.id ?? null,
+                    assetStatus: response.data.assetStatus?.id ?? null,
+                    assetType: response.data.assetType?.id ?? null,
+                    category: response.data.commodity?.id ?? null,
                     engravedNumber: response.data.engravedNumber || '',
                     unitOfMeasure: response.data.unitOfMeasure || '',
                     netValueB: response.data.netValueB || '',
@@ -110,14 +116,21 @@ const UpdateGeneralAsset = () => {
     });
 
     useEffect(() => {
-        reset({ ...defaultAsset });
+        if (defaultAsset) reset({ ...defaultAsset });
     }, [defaultAsset, reset]);
 
     const onSubmit = async (formData: IOfficeEquipment) => {
         setSendingRequest(true);
+        // The server takes these as ids. Whatever shape a picker left behind, send the id or null,
+        // so one stray object can never fail the whole save.
         const request = {
             ...formData,
-            assetType: typeId ? Number(typeId) : formData.assetType
+            supplier: referenceId(formData.supplier),
+            assignedTo: referenceId(formData.assignedTo),
+            branch: referenceId(formData.branch),
+            assetStatus: referenceId(formData.assetStatus),
+            category: referenceId(formData.category),
+            assetType: typeId ? Number(typeId) : referenceId(formData.assetType),
         };
         try {
             const response = await updateOfficeEquipmentService(request, id as string) as IOfficeEquipmentAxiosResponse;
@@ -210,7 +223,7 @@ const UpdateGeneralAsset = () => {
             </Box>
 
             {/* ── Form ── */}
-            {loading ? (
+            {loading || !defaultAsset ? (
                 <Box sx={{ py: 8, display: 'flex', justifyContent: 'center' }}>
                     <Loading items={assetType?.name || 'Asset'} />
                 </Box>
