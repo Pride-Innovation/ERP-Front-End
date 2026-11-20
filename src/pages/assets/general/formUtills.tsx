@@ -230,8 +230,10 @@ const OfficeEquipmentUtills = () => {
 
     const formFields: Array<IFormData<IOfficeEquipment>> = [
         {
+            // The asset's commodity. Labelled Sub-category everywhere; the key stays `category`,
+            // which is also its Configure Fields key - renaming it would orphan every saved setting.
             value: "category",
-            label: 'Select Category',
+            label: 'Sub-category',
             type: "select",
             options: optionsObject.commoditiesOptions
         },

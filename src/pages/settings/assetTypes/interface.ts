@@ -36,6 +36,7 @@ export interface IAssetFieldConfig {
     model?: FieldConfigState;
     serialNumber?: FieldConfigState;
     // Classification
+    /** The asset's sub-category (commodity) - the asset form's `category` field. */
     category?: FieldConfigState;
     unitOfMeasure?: FieldConfigState;
     assetStatus?: FieldConfigState;
@@ -56,7 +57,7 @@ export interface IAssetFieldConfig {
     assignedTo?: FieldConfigState;
     branch?: FieldConfigState;
     supplier?: FieldConfigState;
-    commodity?: FieldConfigState;
+    // No `commodity` key: it controlled nothing. The sub-category setting is `category`.
     // Technical (IT / network)
     ram?: FieldConfigState;
     cpuSpeed?: FieldConfigState;

@@ -153,6 +153,7 @@ const TableComponent = ({
     onApplyFilters,
     onPaginationChange,
     serverSortFields,
+    columnLabels,
     searchKey,
     tableIcon,
     createPermission,
@@ -660,11 +661,11 @@ const TableComponent = ({
                                                 gap: 0.25,
                                             }}
                                         >
-                                            {camelCaseToWords(col.label)}
+                                            {columnLabels?.[col.label] ?? camelCaseToWords(col.label)}
                                         </TableSortLabel>
                                     ) : (
                                         <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748B', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                                            {camelCaseToWords(col.label)}
+                                            {columnLabels?.[col.label] ?? camelCaseToWords(col.label)}
                                         </Typography>
                                     )}
                                 </TableCell>

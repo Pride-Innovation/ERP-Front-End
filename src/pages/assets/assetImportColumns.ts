@@ -71,7 +71,12 @@ export const ASSET_IMPORT_COLUMNS: ColumnSpec[] = [
     { header: 'Tag Name', width: 18, hint: 'Any internal label used alongside the engraved number.' },
 
     // ── Classification ───────────────────────────────────────────────────────
-    { header: 'Commodity', width: 26, list: 'CommodityList', hint: 'Pick from the list. Only commodities in this category are offered.' },
+    /*
+     * The sub-category. The header must stay "Commodity": it camel-cases to the field the importer
+     * reads (`commodity`), so renaming it would make every import silently drop the sub-category.
+     * Only the hint says what it is now called.
+     */
+    { header: 'Commodity', width: 26, list: 'CommodityList', hint: "The asset's sub-category (e.g. Laptop, Chair). Pick from the list - only this category's are offered." },
     { header: 'Supplier', configKey: 'supplier', width: 26, list: 'SupplierList', hint: 'Pick from the list.' },
 
     // ── Placement ────────────────────────────────────────────────────────────

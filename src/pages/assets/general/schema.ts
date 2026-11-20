@@ -82,7 +82,7 @@ export const buildOfficeEquipmentSchema = (
                                 .max(100, 'The LPO reference may be at most 100 characters'),
         // ── Classification ───────────────────────────────────────────────────
         unitOfMeasure:      strField(fieldConfig, 'unitOfMeasure',      'Unit of measure is required',   true),
-        category:           strField(fieldConfig, 'category',           'Category is required',          false),
+        category:           strField(fieldConfig, 'category',           'Sub-category is required',      false),
         // ── Identification (extended) ────────────────────────────────────────
         model:              strField(fieldConfig, 'model',              'Model is required',             false),
         serialNumber:       strField(fieldConfig, 'serialNumber',       'Serial number is required',     false),

@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { AssetContext } from "../../../context/asset";
 import { determineBranchName } from "../../../utils/helpers";
+import { SUB_CATEGORY_KEY } from "./subCategory";
 
 const GeneralAssetUtills = (typeId: string) => {
     const endPoint = 'assets';
@@ -54,6 +55,8 @@ const GeneralAssetUtills = (typeId: string) => {
     const rowData = {
         ...data,
         assetName: "",
+        // The commodity's name, shown as "Sub-category" (see subCategory.ts). Placed after the name.
+        [SUB_CATEGORY_KEY]: "",
         manufacturer: "",
         engravedNumber: "",
         dateReceived: "",
@@ -112,6 +115,7 @@ const GeneralAssetUtills = (typeId: string) => {
             return {
                 ...fielsdata,
                 assetName: item.assetName,
+                [SUB_CATEGORY_KEY]: item.commodity?.name ?? "",
                 engravedNumber: item.engravedNumber,
                 dateReceived: moment(item.dateReceipt).format('Do MMMM YYYY'),
                 make: item.make,

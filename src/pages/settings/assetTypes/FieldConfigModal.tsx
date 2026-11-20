@@ -65,7 +65,8 @@ const FIELD_GROUPS: FieldGroup[] = [
     {
         title: 'Classification',
         fields: [
-            { key: 'category', label: 'Category' },
+            // The asset form's commodity dropdown, whose field (and so this key) is `category`.
+            { key: 'category', label: 'Sub-category' },
             { key: 'unitOfMeasure', label: 'Unit of Measure' },
             { key: 'assetStatus', label: 'Status' },
         ],
@@ -97,7 +98,13 @@ const FIELD_GROUPS: FieldGroup[] = [
             { key: 'assignedTo', label: 'Assigned To' },
             { key: 'branch', label: 'Branch / Location' },
             { key: 'supplier', label: 'Supplier' },
-            { key: 'commodity', label: 'Sub-category' },
+            /*
+             * There was a `commodity` entry here, also labelled "Sub-category", that controlled
+             * nothing: no form field, validation rule or import column reads that key. The real
+             * sub-category setting is `category` above. Removed so one label means one setting; the
+             * modal saves only the keys it lists, so a stored `commodity` value is dropped on the
+             * next save, harmlessly.
+             */
         ],
     },
     {

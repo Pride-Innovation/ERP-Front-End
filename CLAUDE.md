@@ -3378,6 +3378,46 @@ switched off stays off; this is what fills a new database's list.
 
 `UnitOfMeasureTest` (backend) and `unitsOfMeasure.test.ts` pin it.
 
+## Sub-category on the assets register (the commodity, renamed in the UI only)
+
+The level below a category (Laptop under Computers, Chair under Furniture) **is the commodity**. The
+register now shows it as a **Sub-category** column, filters on it, sorts on it and exports it.
+
+**The label changed; no key did — and that is the whole of the safety here.**
+
+| Where | Key (unchanged) | Label now |
+|---|---|---|
+| Asset form field | `category` | Sub-category |
+| Configure Fields entry | `category` | Sub-category |
+| `GET /assets` filter | `commodityId` (+ new `noCommodity`) | Sub-category |
+| Import column | header **`Commodity`** | hint only — the importer camel-cases the header into the field it reads, so renaming it would silently drop the sub-category from every import |
+| Register row / export | `subCategory` | Sub-category |
+
+**Configure Fields had two entries for one thing, and the wrong one was dead.** `category` (labelled
+"Category") controls the commodity dropdown, because that is the form field's name; `commodity`
+(labelled "Sub-category") was read by nothing — no form field, schema rule or import column. An
+administrator setting "Sub-category" to Required saw no effect. The dead entry is removed (the modal
+saves only the keys it lists, so a stored `commodity` value is dropped on the next save) and `category`
+is labelled Sub-category. **Renaming the form label alone would have left the setting that controls it
+reading "Category".**
+
+- **"Not set"** is `noCommodity=true` — a LEFT join with `id IS NULL` (trap #1); `commodityId` and the
+  sort share the same join (`AssetSearchDao.commodityJoin`). `subCategoryParams` translates the filter's
+  sentinel for **both** the table and the export, so a file holds what the screen shows.
+- **Sort** by `commodityName` (whitelisted in `SORTABLE`, resolved through the join, `id` tie-break
+  kept); assets with none come first ascending.
+- `AssetService.fetchAllAssets` gained a 25th parameter through an **overload**, so its positional
+  callers (two report tests) are untouched.
+- **The table remounts per category** (`key={typeId}`): it kept its own applied filters across a
+  category switch, harmless until a filter whose values belong to one category — a Furniture "Chair"
+  would have ridden along on the next Apply under Computers and emptied the table.
+- `TableComponent.columnLabels` (optional) overrides a header's camelCase reading; only this column uses it.
+- *An admin-saved export configuration for the register omits the new column until ticked* — that is the
+  configuration working, not a fault.
+
+`AssetSubCategoryTest` (expectations from the entities; "Not set" verified non-vacuous by disabling it)
+and `subCategory.test.ts`.
+
 ## Still open
 
 **1. Permissions gating across the app — front-end sweep done.** Row menus are now filtered

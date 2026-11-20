@@ -518,7 +518,7 @@ const GeneralAssetDetails = () => {
                                             <Grid item xs={12} sm={6}><Field label="Status" value={asset.assetStatus?.status ? camelCaseToWords(asset.assetStatus.status) : null} /></Grid>
                                             <Grid item xs={12} sm={6}><Field label="Location" value={assetLocationLabel(asset)} /></Grid>
                                             <Grid item xs={12} sm={6}><Field label="Assigned To" value={asset.assignedTo ? `${asset.assignedTo.lastName ?? ''} ${asset.assignedTo.firstName ?? ''}`.trim() : null} /></Grid>
-                                            <Grid item xs={12} sm={6}><Field label="Commodity" value={asset.commodity?.name || null} /></Grid>
+                                            <Grid item xs={12} sm={6}><Field label="Sub-category" value={asset.commodity?.name || null} /></Grid>
                                         </Section>
 
                                         <Section title="Financials & References" icon={<PaidOutlinedIcon />}>
