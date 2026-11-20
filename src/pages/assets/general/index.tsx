@@ -52,6 +52,15 @@ import { assetImportHeaders } from "../assetImportTemplate";
 import AssetBulkImportResult from "../AssetBulkImportResult";
 import ImportProgressDialog from "../../../components/forms/ImportProgressDialog";
 import { fetchAllBranches, ReferenceOption, fetchAllDepartments } from "../../users/service/referenceData";
+import {
+    SUB_CATEGORY_KEY,
+    SUB_CATEGORY_LABEL,
+    SubCategoryOption,
+    fetchSubCategories,
+    subCategoryOptions,
+    subCategoryParams,
+    subCategorySummary,
+} from "./subCategory";
 
 /**
  * Statuses an asset can actually be in.
@@ -188,6 +197,9 @@ const GeneralAssets = () => {
     /** Branches for the Location filter; fetched once. */
     const [branches, setBranches] = useState<ReferenceOption[]>([]);
 
+    /** This category's sub-categories (its commodities) for the Sub-category filter, plus "Not set". */
+    const [subCategories, setSubCategories] = useState<SubCategoryOption[]>([]);
+
     // ── Bulk import ──────────────────────────────────────────────────────────
     const [importResult, setImportResult] = useState<IAssetImportResult | null>(null);
     const [importRows, setImportRows] = useState<any[]>([]);
@@ -265,7 +277,8 @@ const GeneralAssets = () => {
             // rows on screen. Unset means the endpoint's own default: newest first.
             ...(pageModel?.sortBy ? { sortBy: pageModel.sortBy } : {}),
             ...(pageModel?.sortDirection ? { sortDirection: pageModel.sortDirection } : {}),
-            ...rest,
+            // "Sub-category: Not set" becomes noCommodity=true; a chosen one stays commodityId.
+            ...subCategoryParams(rest),
         };
 
         try {
@@ -346,6 +359,8 @@ const GeneralAssets = () => {
             out.push({ label: 'Status', value: name });
         }
         if (f.assetName) out.push({ label: 'Asset Name', value: String(f.assetName) });
+        const subCategory = subCategorySummary(f.commodityId, subCategories);
+        if (subCategory) out.push({ label: SUB_CATEGORY_LABEL, value: subCategory });
         if (f.engravedNumber) out.push({ label: 'Engraved No', value: String(f.engravedNumber) });
         if (f.serialNumber) out.push({ label: 'Serial No', value: String(f.serialNumber) });
         if (f.model) out.push({ label: 'Model', value: String(f.model) });
@@ -401,7 +416,8 @@ const GeneralAssets = () => {
                     ...(statusId ? { assetStatusId: statusId } : {}),
                     ...(dateReceivedFrom ? { startDate: dateReceivedFrom } : {}),
                     ...(dateReceivedTo ? { endDate: dateReceivedTo } : {}),
-                    ...rest,
+                    // The same translation as the table, so the file holds what the screen shows.
+                    ...subCategoryParams(rest),
                 },
             }) as IOfficeEquipmentsAxiosResponse;
 
@@ -426,6 +442,20 @@ const GeneralAssets = () => {
             toast.error('Could not build the export. Please try again.');
         }
     };
+
+    // The Sub-category filter's options belong to the category on screen, so they reload with it.
+    // Cleared first, and a late reply for a category already left is ignored, so one category's
+    // sub-categories are never offered under another.
+    useEffect(() => {
+        setSubCategories([]);
+        const assetTypeId = currentAssetType?.id;
+        if (!assetTypeId) return;
+        let current = true;
+        fetchSubCategories(assetTypeId)
+            .then((list) => { if (current) setSubCategories(subCategoryOptions(list)); })
+            .catch((e) => console.warn('Failed to load sub-categories for the filter', e));
+        return () => { current = false; };
+    }, [currentAssetType?.id]);
 
     // Find and set the current asset type from URL param
     useEffect(() => {
@@ -931,6 +961,13 @@ const GeneralAssets = () => {
                     }}
                 >
                 <TableComponent
+                    /*
+                     * A fresh table per category. Switching category already resets the query, but
+                     * the table kept its own applied filters, sort and search - and a sub-category
+                     * belongs to one category, so a Furniture "Chair" carried into Computers would
+                     * ride along on the next Apply and empty the table.
+                     */
+                    key={typeId}
                 tableKey="assets"
                     endPoint={endPoint}
                     loading={loading}
@@ -972,6 +1009,16 @@ const GeneralAssets = () => {
                      */
                     columnFilters={[
                         { key: 'assetName', label: 'Asset Name', type: 'text' },
+                        /*
+                         * Sub-category - the asset's commodity (Laptop, Chair, …), offered from this
+                         * category's own list plus "Not set". The key is `commodityId`, which GET
+                         * /assets declares; "Not set" is translated to `noCommodity` by
+                         * subCategoryParams before the request is built.
+                         */
+                        {
+                            key: 'commodityId', label: SUB_CATEGORY_LABEL, type: 'select',
+                            options: subCategories,
+                        },
                         { key: 'engravedNumber', label: 'Engraved No', type: 'text' },
                         { key: 'serialNumber', label: 'Serial No', type: 'text' },
                         { key: 'model', label: 'Model', type: 'text' },
@@ -1037,8 +1084,11 @@ const GeneralAssets = () => {
                      * associations the sort cannot reach, and Status resolves through a join, so
                      * those keep sorting the visible page rather than pretending to sort the table.
                      */
+                    columnLabels={{ [SUB_CATEGORY_KEY]: SUB_CATEGORY_LABEL }}
                     serverSortFields={{
                         assetName: 'assetName',
+                        // By the commodity's name, through a LEFT join (AssetSearchDao).
+                        [SUB_CATEGORY_KEY]: 'commodityName',
                         engravedNumber: 'engravedNumber',
                         serialNumber: 'serialNumber',
                         make: 'make',

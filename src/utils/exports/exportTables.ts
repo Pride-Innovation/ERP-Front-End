@@ -73,6 +73,8 @@ export const EXPORT_TABLES: ExportTable[] = [
          */
         columns: [
             on('assetName', 'Asset name'),
+            // The asset's commodity, by name. Key matches SUB_CATEGORY_KEY in the assets row mapper.
+            on('subCategory', 'Sub-category'),
             on('engravedNumber', 'Engraved number'),
             on('serialNumber', 'Serial number'),
             on('model', 'Model'),

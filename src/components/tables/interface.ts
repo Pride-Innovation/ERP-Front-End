@@ -161,6 +161,12 @@ export interface ITableComponent {
      */
     serverSortFields?: Record<string, string>;
     /**
+     * Header text for row keys whose words-from-camelCase reading is wrong - e.g. `subCategory`,
+     * which would read "Sub Category" where the application says "Sub-category". Display only: sort
+     * and filters still use the row key. Omit it and every header reads as before.
+     */
+    columnLabels?: Record<string, string>;
+    /**
      * Field name the search box filters on for this module, e.g. `assetName`.
      *
      * <p>Server-side search previously hardcoded `name` for every module, which most endpoints do
